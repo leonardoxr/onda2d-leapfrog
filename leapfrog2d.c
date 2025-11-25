@@ -1,3 +1,28 @@
+/**
+ * @file leapfrog2d.c
+ * @brief 2D Wave Propagation Simulator using Leapfrog Finite Difference Method
+ *
+ * COLLEGE PROJECT - Educational purposes only
+ *
+ * This program simulates 2D wave propagation over variable depth terrain
+ * using the leapfrog time-stepping scheme. It models shallow water waves
+ * (similar to tsunamis) where wave speed depends on water depth.
+ *
+ * Mathematical Model:
+ *   u(x,y,t) = wave height at position (x,y) and time t
+ *   Î»(x,y)   = terrain depth function
+ *
+ * Discretized wave equation:
+ *   u[t+1] = 2*u[t] - u[t-1] + (Î”tÂ²/Î”xÂ²) * âˆ‡Â²u
+ *
+ * Grid: 71x71 points
+ * Time steps: 300 iterations
+ * Output: onda.txt (diagonal slice of the grid)
+ *
+ * Compilation: gcc leapfrog2d.c -o leapfrog2d -lm
+ * Usage: ./leapfrog2d
+ */
+
 #include<stdio.h>
 #include<math.h>
 #include<string.h>
@@ -5,12 +30,45 @@
 #define nx_ 71
 #define ny_ 71
 
+/**
+ * @brief Generates Gaussian (bell curve) initial wave profile
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param tam Grid size
+ * @return Wave height at (x,y)
+ */
 double gauss( int x, int y, int tam);
 
-double     H( int x, int y, int tam);
+/**
+ * @brief Terrain depth function (inverted Gaussian)
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param tam Grid size
+ * @return Terrain depth at (x,y)
+ */
+double H( int x, int y, int tam);
 
+/**
+ * @brief Updates wave state using leapfrog method
+ * @param u_new Output: wave at time t+1
+ * @param u_now Input: wave at time t
+ * @param u_old Input: wave at time t-1
+ * @param lambda Terrain depth map
+ * @param a,b,c Coefficients for leapfrog equation
+ * @param nx,ny Grid dimensions
+ * @param rx,ry Courant numbers (dt/dx, dt/dy)
+ */
 void atualizar_onda(double u_new[][ny_], double u_now[][ny_], double u_old[][ny_], double lambda[][ny_], double a,  double b,  double c, int nx, int ny, double rx, double ry);
 
+/**
+ * @brief Computes spatial derivative term for wave equation
+ * @param rx,ry Courant numbers
+ * @param lambda Terrain depth
+ * @param u_now Current wave state
+ * @param i,j Current grid point
+ * @param im1,ip1,jm1,jp1 Neighbor indices (for boundary handling)
+ * @return Spatial derivative contribution
+ */
 double delta_u( double rx, double ry, double lambda[][ny_],  double u_now[][ny_], int i,  int j, int  im1, int ip1, int jm1, int jp1);
 
 
@@ -52,7 +110,7 @@ void main()
     rx = 0.25;
     ry = 0.25;
 
-    //   incio loop da condição inicial,
+    //   incio loop da condiï¿½ï¿½o inicial,
     //   laco duplo e usado para percorrer matrix nx*ny
 
     for(j = 0 ; j < ny  ; j++)
@@ -67,7 +125,7 @@ void main()
         }
     }
 
-    //   fim loop da condição inicial
+    //   fim loop da condiï¿½ï¿½o inicial
 
 
     /*  calculo "sintetico" de u_old, pois a atualizacao */
@@ -77,7 +135,7 @@ void main()
 
 
 
-    //inicio do laço temporal
+    //inicio do laï¿½o temporal
 
     for(t = 0 ; t < tmax ; t++)
     {
@@ -147,7 +205,7 @@ double gauss(int x, int y,int tam)
 
 
 
-/* a funcao H corresponde ao formato do terreno, retorna a profundidade em relação a aguas calmas */
+/* a funcao H corresponde ao formato do terreno, retorna a profundidade em relaï¿½ï¿½o a aguas calmas */
 
 double H(int x, int y,int tam)
 {
@@ -169,9 +227,9 @@ double H(int x, int y,int tam)
 
 void atualizar_onda(double u_new[][ny_], double u_now[][ny_], double u_old[][ny_], double lambda[][ny_], double a,  double b,  double c, int nx, int ny, double rx, double ry)
 {
-// DOUBLE U_NEW[][NY_)] SINALIZA PARA O C QUE A FUNÇÃO RECEBERA UMA MATRIZ( TECNICAMENTE RECEBERA O ENDEREÇO NA MEMORIA DA MATRIZ) POR ISSO NÃO É NECESSARIO RETORNAR NENHUM VALOR
-// ESTA "TECNICA" É POSSIVEL POIS O NOME DA MATRIZ, NO CASO U_NEW, É NA VERDADE O ENDEREÇO DESSA MATRIZ NA MEMORIA. COMO ESTAMOS PASSANDO O ENDEREÇO NA MEMORIA, A FUNÇÃO CONSEGUE ALTERAR OS VALORES SEM NECESSIDADE DE RETORNO
-// PRECISAMOS DECLARAR O [NY_] NA FUNÇÃO POR QUESTÕES TECNICAS. MAS PENSEM NESSA SINTAXE COMO: PASSANDO O ENDEREÇO DA MATRIX PARA A FUNÇÃO, SEM NECESSIDADE DE RETORNO. A FUNÇÃO É LIVRE PARA EDITAR A PROPRIA MATRIZ
+// DOUBLE U_NEW[][NY_)] SINALIZA PARA O C QUE A FUNï¿½ï¿½O RECEBERA UMA MATRIZ( TECNICAMENTE RECEBERA O ENDEREï¿½O NA MEMORIA DA MATRIZ) POR ISSO Nï¿½O ï¿½ NECESSARIO RETORNAR NENHUM VALOR
+// ESTA "TECNICA" ï¿½ POSSIVEL POIS O NOME DA MATRIZ, NO CASO U_NEW, ï¿½ NA VERDADE O ENDEREï¿½O DESSA MATRIZ NA MEMORIA. COMO ESTAMOS PASSANDO O ENDEREï¿½O NA MEMORIA, A FUNï¿½ï¿½O CONSEGUE ALTERAR OS VALORES SEM NECESSIDADE DE RETORNO
+// PRECISAMOS DECLARAR O [NY_] NA FUNï¿½ï¿½O POR QUESTï¿½ES TECNICAS. MAS PENSEM NESSA SINTAXE COMO: PASSANDO O ENDEREï¿½O DA MATRIX PARA A FUNï¿½ï¿½O, SEM NECESSIDADE DE RETORNO. A FUNï¿½ï¿½O ï¿½ LIVRE PARA EDITAR A PROPRIA MATRIZ
 
     int i,j;
 
@@ -180,12 +238,12 @@ void atualizar_onda(double u_new[][ny_], double u_now[][ny_], double u_old[][ny_
     {
         for(i = 1 ; i < nx - 1  ; i++)
 
-            // SEPAREI PARTE DA EQUAÇAO EM OUTRA FUNÇÃO PARA SIMPLIFICAR A VIDA. DELTA_U É SIMPLESMENTE UMA PARTE DA EQUAÇÃO ORIGINAL
+            // SEPAREI PARTE DA EQUAï¿½AO EM OUTRA FUNï¿½ï¿½O PARA SIMPLIFICAR A VIDA. DELTA_U ï¿½ SIMPLESMENTE UMA PARTE DA EQUAï¿½ï¿½O ORIGINAL
 
             u_new[i][j] = a * 2 * u_now[i][j] - b * u_old[i][j] + c * delta_u(rx,ry,lambda,u_now,i,j,i-1,i+1,j-1,j+1);
     }
 
-    //PRECISAMOS AGORA ATUALIZAR AS LINHAS E COLUNAS EXTERNAS DA MATRIZ, POIS ESTAS NÃO FORAM INCLUIDAS NO LOOP ANTERIOR. ESTA AÇÃO NÃO ATUALIZA AS PONTAS, OU QUINAS, DA MATRIZ
+    //PRECISAMOS AGORA ATUALIZAR AS LINHAS E COLUNAS EXTERNAS DA MATRIZ, POIS ESTAS Nï¿½O FORAM INCLUIDAS NO LOOP ANTERIOR. ESTA Aï¿½ï¿½O Nï¿½O ATUALIZA AS PONTAS, OU QUINAS, DA MATRIZ
 
 
     i = 0; // ATUALZANDO A PRIMEIRA COLUNA DA MATRIZ
@@ -253,7 +311,7 @@ void atualizar_onda(double u_new[][ny_], double u_now[][ny_], double u_old[][ny_
 
 double delta_u( double rx, double ry, double lambda[][ny_],  double u_now[][ny_], int i,  int j, int  im1, int ip1, int jm1, int jp1)
 {
-    //CALCULAMOS AQUI  SEPARADO UMA PARTE DA EQUAÇÃO, POIS ELA MUDA DEPENDENDO DO QUE ESTAMOS CALCULANDO. SEJA UMA COLUNA INICIAL OU FINAL OU UM CANTO DA MATRIZ
+    //CALCULAMOS AQUI  SEPARADO UMA PARTE DA EQUAï¿½ï¿½O, POIS ELA MUDA DEPENDENDO DO QUE ESTAMOS CALCULANDO. SEJA UMA COLUNA INICIAL OU FINAL OU UM CANTO DA MATRIZ
     //PARA ISSO COLOQUEI VALORES AUXILIARES DE IM1, IP1, JM1, JP1 . P DE PLUS E M DE MINUS.POIS ESTES VALORES SAO TROCADOS EM VARIAS PARTES
 
     return (
